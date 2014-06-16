@@ -205,6 +205,8 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 			"display": "none",
 			
 			"position": "absolute",
+			"top": "0px",
+			"left": "0px",
 			
 			"zIndex": "1",
 			
@@ -265,6 +267,8 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 			"display": "none",
 			
 			"position": "absolute",
+			"top": "0px",
+			"left": "0px",
 			
 			"zIndex": "1",
 			"bottom": "0px",
@@ -729,7 +733,26 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 				
 				var toggleBox = toggleIcon.getToggleBox( );
 				toggleBox.setAttribute( "fill", constructColor( 0, 0, 0 ) ); 
-			} );	 
+			} );
+
+		var self = this;
+		advanceToggleButton.addEventListener( "click",
+			function onClick( ){
+				if( eventState.checkState( "advance-toggle-activated" ) ){
+					eventState.popState( "advance-toggle-activated" );
+					eventState.pushState( "advance-toggle-deactivated" );
+
+					self.componentSet.headerPane.style.display = "none";
+					self.componentSet.footerPane.style.display = "none";
+				}else{
+					eventState.popState( "advance-toggle-deactivated" );
+					eventState.pushState( "advance-toggle-activated" );
+
+					self.componentSet.headerPane.style.display = "block";
+					self.componentSet.footerPane.style.display = "block";
+				}
+				
+			} );
 	};
 	terminalLine.addAdvanceToggleButtonUIEventSet = addAdvanceToggleButtonUIEventSet;
 	
@@ -768,7 +791,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 		
 		this.componentSet.advanceToggleButton = advanceToggleButton;
 		
-		addAdvanceToggleButtonUIEventSet( advanceToggleButton, toggleIcon );
+		this.addAdvanceToggleButtonUIEventSet( advanceToggleButton, toggleIcon );
 		
 		return advanceToggleButton;
 	};
@@ -880,7 +903,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 		
 		closeButton.appendChild( closeIcon );
 		
-		addCloseButtonUIEventSet( closeButton, closeIcon );
+		this.addCloseButtonUIEventSet( closeButton, closeIcon );
 		
 		return closeButton;	 
 	};
@@ -1000,7 +1023,15 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 	/*
 	*/
 	var renderBodyPaneList = terminalLine.renderBodyPaneList ||
-	function renderBodyPaneList( ){
+	function renderBodyPaneList( optionSet ){
+		if( optionSet 
+			&& typeof optionSet != "object" )
+		{
+			var error = new Error( "invalid option set" );
+			console.error( error );
+			throw error;
+		}
+
 		var outputPane = this.componentSet.outputPane;
 		var bodyPaneSingleHeight = absoluteHeight;
 		var textListLength = this.textList.length;
@@ -1023,12 +1054,23 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 			text = this.textList[ index ];
 			
 			outputPane.style.height = ( absoluteHeight * index + absoluteHeight ) + "px";
-			
+			if( optionSet && 
+				"additionalOutputPaneHeight" in optionSet )
+			{
+				outputPane.style.height += optionSet.additionalOutputPaneHeight;
+			}
+
 			currentBodyPane = this.constructBodyPane( );
 			currentMainTextNodeContainer = this.constructMainTextNodeContainer( );
 			currentMainTextNode = this.constructMainTextNode( text );
 			
 			topDistance = ( absoluteHeight * index );
+			if( optionSet && 
+				"additionalTopDistance" in optionSet )
+			{
+				topDistance += optionSet.additionalTopDistance;
+			}
+			
 			currentBodyPane.topDistance = topDistance;
 			currentBodyPaneTopDistance = topDistance + "px";
 			currentBodyPane.style.top = currentBodyPaneTopDistance;
@@ -1118,6 +1160,8 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 	TerminalLineComponent.prototype.constructTerminalLineComponent = constructTerminalLineComponent;
 	TerminalLineComponent.prototype.constructAdvanceToggleButton = constructAdvanceToggleButton;
 	TerminalLineComponent.prototype.constructCloseButton = constructCloseButton;
+	TerminalLineComponent.prototype.addAdvanceToggleButtonUIEventSet = addAdvanceToggleButtonUIEventSet;
+	TerminalLineComponent.prototype.addCloseButtonUIEventSet = addCloseButtonUIEventSet;
 	
 	terminalLine.TerminalLineComponent = TerminalLineComponent;
 
