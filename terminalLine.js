@@ -1078,12 +1078,10 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 			currentMainTextNodeContainer.appendChild( currentMainTextNode );
 			currentBodyPane.appendChild( currentMainTextNodeContainer );
 			
-			if( index == 0 ){
-				currentCloseButton = this.constructCloseButton( 20 );
-			}else{
+			if( index != 0 ){
 				currentCloseButton = this.constructCloseButton( );
+				currentBodyPane.appendChild( currentCloseButton );
 			}
-			currentBodyPane.appendChild( currentCloseButton );
 			
 			outputPane.appendChild( currentBodyPane );
 		}
@@ -1185,9 +1183,3 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 	
 	return terminalLineEngine;
 };
-
-var consoleDebug = console.debug;
-console.debug = terminalLine( "console-debug", consoleDebug ); 
-
-console.debug( "Console.debug Test", "world domination", "progressively" );
-console.debug( "Console.debug Test", "world domination", "progressively" );
