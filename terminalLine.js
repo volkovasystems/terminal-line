@@ -78,7 +78,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
         var headerPane = document.createElement( "div" );
         
 		setStyle( headerPane, {
-		    "display": "none",
+            "display": "none",
 		    
 		    "position": "absolute",
 		    
@@ -138,7 +138,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
         var footerPane = document.createElement( "div" );
         
         setStyle( footerPane, {
-		    "display": "none",
+            "display": "none",
 		    
 		    "position": "absolute",
 		    
@@ -242,6 +242,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
         
         addAttributeSet( svgCircleElement, dimensionSet );
         addAttributeSet( svgCircleElement, defaultAttributeSet );
+     
         if( svgElement ){
             svgElement.appendToGElement( svgCircleElement );
         }
@@ -579,6 +580,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
     var addAdvanceToggleButtonUIEventSet = terminalLine.addAdvanceToggleButtonUIEventSet ||
     function addAdvanceToggleButtonUIEventSet( advanceToggleButton, toggleIcon ){
         var eventState = new State( );
+     
         advanceToggleButton.addEventListener( "mouseover",
             function onMouseOver( ){
                 eventState.popState( "mouseleave" );
@@ -780,16 +782,60 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
     
     var constructTextInputBox = terminalLine.constructTextInputBox || 
     function constructTextInputBox( ){
-        
+
+        var textInputBox = document.createElement( "input" );
+
+        addAttributeSet( textInputBox, {
+            "type": "text",
+            "name": "textInputBox",
+            "value": "textHere",
+
+            "size": "1",      
+            "border": "1px solid #000000 ",
+            "margin": "0px",
+            "padding": "0px",            
+            "width": "0%",
+            "height": "0%"
+
+        } );
+
+        this.componentSet.constructTextInputBox = constructTextInputBox;
+
+        return textInputBox;
+            
     };
     terminalLine.constructTextInputBox = constructTextInputBox;
     
-    var constructTextInputContainer = terminalLine.constructTextInputContainer ||
-    function constructTextInputContainer( ){
-        var textInputContainer = document.createElement( "div" );
+    var constructTextInputBoxContainer = terminalLine.constructTextInputBoxContainer ||
+    function constructTextInputBoxContainer( ){
+        var textInputBoxContainer = document.createElement( "div" );
+
+        setStyle( textInputBoxContainer, {
+            "display": "inline-block",
+            //hidden
+            "overflow":"hidden",
+            "position": "absolute",
+            
+            "zIndex": "0",
+            
+            "border": "0px",
+            "margin": "0px",
+            "padding": "0px",
+            
+            "width": "0%",
+            "height": "0%",
+            
+            "backgroundColor": "#ff0000",
+            
+            "boxSizing": "border-box"
+        } );
         
+        this.componentSet.constructTextInputBoxContainer = constructTextInputBoxContainer;
+
+        return textInputBoxContainer;
+
     };
-    terminalLine.constructTextInputContainer = constructTextInputContainer;
+    terminalLine.constructTextInputBoxContainer = constructTextInputBoxContainer;
     
     /*
     */
@@ -828,7 +874,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 		    "fontFamily": "Consolas",
 		    "textRendering": "optimizeLegibility",
 		    "whiteSpace": "nowrap"
-		} );      
+        } );      
 		
 		this.componentSet.mainTextNodeContainerList.push( mainTextNodeContainer );
 		
@@ -841,15 +887,22 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
     var renderBodyPaneList = terminalLine.renderBodyPaneList ||
     function renderBodyPaneList( ){
         var outputPane = this.componentSet.outputPane;
+        
         var bodyPaneSingleHeight = absoluteHeight;
         var textListLength = this.textList.length;
         
         var currentBodyPane = null;
+
+        var currentTextInputBox = null;
+        var currentTextInputBoxContainer = null;
+        
+        var text = "";        
         var currentMainTextNode = null;
         var currentMainTextNodeContainer = null;
+        
         var currentCloseButton = null;
-        var text = "";
         var topDistance = 0;
+        
         var currentBodyPaneYCoordinate = 0;
         for( var index = 0; index < textListLength; index++ ){
             text = this.textList[ index ];
@@ -857,8 +910,12 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
             outputPane.style.height = ( absoluteHeight * index + absoluteHeight ) + "px";
             
             currentBodyPane = this.constructBodyPane( );
-            currentMainTextNodeContainer = this.constructMainTextNodeContainer( );
+
+            currentTextInputBox = this.constructTextInputBox( );
+            currentTextInputBoxContainer = this.constructTextInputBoxContainer( ); 
+            
             currentMainTextNode = this.constructMainTextNode( text );
+            currentMainTextNodeContainer = this.constructMainTextNodeContainer( );
             
             topDistance = ( absoluteHeight * index );
             currentBodyPane.topDistance = topDistance;
@@ -866,7 +923,10 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
             currentBodyPane.style.top = currentBodyPaneTopDistance;
             
             currentMainTextNodeContainer.appendChild( currentMainTextNode );
+            currentTextInputBoxContainer.appendChild( currentTextInputBox );
+            
             currentBodyPane.appendChild( currentMainTextNodeContainer );
+            currentBodyPane.appendChild( currentTextInputBoxContainer );
             
             if( index == 0 ){
                 currentCloseButton = this.constructCloseButton( 20 );
@@ -911,10 +971,11 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
         var advanceToggleButton = this.constructAdvanceToggleButton( );
         outputPane.appendChild( advanceToggleButton );
         
-		var datePane = document.createElement( "span" );
+		/*var datePane = document.createElement( "span" );
 		var dateNow = new Date( Date.now( ) );
 		datePaneTextNode = document.createTextNode( dateNow );
 		datePane.appendChild( datePaneTextNode );
+        */
 
 		parentContainer.appendChild( outputPane );	
 	}
@@ -931,6 +992,7 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 	*/
 	TerminalLineComponent.prototype.initialize = function initialize( namespaceUID, textList ){
 	    this.namespaceUID = namespaceUID;
+
 	    this.textList = textList;
 	    
 	    this.componentSet = { };
@@ -939,15 +1001,17 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 	    
 	    this.terminalLineComponentState = new State( );
 	};
-	
+    
 	TerminalLineComponent.prototype.constructOutputPane = constructOutputPane;
 	TerminalLineComponent.prototype.constructHeaderPane = constructHeaderPane;
 	TerminalLineComponent.prototype.constructBodyPane = constructBodyPane;
 	TerminalLineComponent.prototype.constructFooterPane = constructFooterPane;
-	TerminalLineComponent.prototype.constructMainTextNode = constructMainTextNode;
-	TerminalLineComponent.prototype.renderBodyPaneList = renderBodyPaneList;
-	TerminalLineComponent.prototype.constructMainTextNodeContainer = constructMainTextNodeContainer;
-	TerminalLineComponent.prototype.constructTerminalLineComponent = constructTerminalLineComponent;
+	TerminalLineComponent.prototype.constructTextInputBox = constructTextInputBox;
+    TerminalLineComponent.prototype.constructTextInputBoxContainer =constructTextInputBoxContainer;
+    TerminalLineComponent.prototype.constructMainTextNode = constructMainTextNode;
+    TerminalLineComponent.prototype.constructMainTextNodeContainer = constructMainTextNodeContainer;
+    TerminalLineComponent.prototype.renderBodyPaneList = renderBodyPaneList;
+    TerminalLineComponent.prototype.constructTerminalLineComponent = constructTerminalLineComponent;
 	TerminalLineComponent.prototype.constructAdvanceToggleButton = constructAdvanceToggleButton;
 	TerminalLineComponent.prototype.constructCloseButton = constructCloseButton;
     
@@ -968,13 +1032,14 @@ var terminalLine = function terminalLine( namespace, terminalEngine, container, 
 	    terminalLineComponentSet[ namespaceUID ] = new TerminalLineComponent( namespaceUID, parameterList );
 	    
 	    terminalEngine.apply( this, parameterList );
-	};
-	terminalLine.terminalLineEngine = terminalLineEngine;
+    };
+    terminalLine.terminalLineEngine = terminalLineEngine;
     
 	return terminalLineEngine;
 };
 
 var consoleDebug = console.debug;
+
 console.debug = terminalLine( "console-debug", consoleDebug ); 
 
 console.debug( "Console.debug Test", "world domination", "progressively" );
